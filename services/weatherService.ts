@@ -17,6 +17,7 @@ export const getWeatherData = async (city: string): Promise<{ weather: WeatherDa
           q: city,
           appid: API_KEY,
           units: 'metric',
+          lang: 'ua',
         },
       }),
       axios.get<ForecastData>(`${BASE_URL}/forecast`, {
@@ -24,6 +25,7 @@ export const getWeatherData = async (city: string): Promise<{ weather: WeatherDa
           q: city,
           appid: API_KEY,
           units: 'metric',
+          lang: 'ua',
         },
       }),
     ]);
@@ -34,7 +36,11 @@ export const getWeatherData = async (city: string): Promise<{ weather: WeatherDa
     };
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch weather data');
+      const message = error.response?.data?.message;
+      if (message === 'city not found') {
+        throw new Error('Місто не знайдено');
+      }
+      throw new Error(message || 'Не вдалося отримати дані про погоду');
     }
     throw error;
   }

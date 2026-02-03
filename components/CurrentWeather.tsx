@@ -1,6 +1,7 @@
 import React from 'react';
 import { WeatherData } from '../types';
 import { format } from 'date-fns';
+import { uk } from 'date-fns/locale';
 import { MapPin, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface CurrentWeatherProps {
@@ -27,8 +28,8 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data }) => {
         <div className="text-2xl font-light text-white/90 capitalize mt-2">
           {weather[0].description}
         </div>
-        <div className="text-white/60 font-light mt-1">
-          {format(currentDate, 'EEEE, d MMMM')}
+        <div className="text-white/60 font-light mt-1 capitalize">
+          {format(currentDate, 'EEEE, d MMMM', { locale: uk })}
         </div>
       </div>
 

@@ -11,40 +11,40 @@ const WeatherGrid: React.FC<WeatherGridProps> = ({ data }) => {
 
   const items = [
     {
-      label: 'Feels Like',
+      label: 'Відчувається як',
       value: `${Math.round(main.feels_like)}°`,
       icon: Thermometer,
-      desc: 'Actual feel'
+      desc: 'Реальне відчуття'
     },
     {
-      label: 'Wind',
+      label: 'Вітер',
       value: `${Math.round(wind.speed)} km/h`,
       icon: Wind,
-      desc: `Direction: ${wind.deg}°`
+      desc: `Напрямок: ${wind.deg}°`
     },
     {
-      label: 'Humidity',
+      label: 'Вологість',
       value: `${main.humidity}%`,
       icon: Droplets,
-      desc: 'Dew point'
+      desc: 'Точка роси'
     },
     {
-      label: 'Pressure',
+      label: 'Тиск',
       value: `${main.pressure} hPa`,
       icon: Gauge,
-      desc: 'Atmospheric'
+      desc: 'Атмосферний'
     },
     {
-      label: 'Visibility',
+      label: 'Видимість',
       value: `${(visibility / 1000).toFixed(1)} km`,
       icon: Eye,
-      desc: 'Clear view'
+      desc: 'Ясна видимість'
     },
     {
-      label: 'Cloudiness',
+      label: 'Хмарність',
       value: `${clouds.all}%`,
       icon: Cloud,
-      desc: 'Sky cover'
+      desc: 'Покриття неба'
     }
   ];
 

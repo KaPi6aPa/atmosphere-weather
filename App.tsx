@@ -22,7 +22,7 @@ const App: React.FC = () => {
       setWeather(data.weather);
       setForecast(data.forecast);
     } catch (err: any) {
-      setError(err.message || 'Could not fetch weather data');
+      setError(err.message || 'Не вдалося отримати дані про погоду');
       setWeather(null);
       setForecast(null);
     } finally {
@@ -66,9 +66,9 @@ const App: React.FC = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 sm:mb-12 gap-4">
           <div className="text-white">
             <h1 className="text-2xl font-semibold tracking-tight">Atmosphere</h1>
-            <p className="text-white/60 text-sm font-light">Weather Dashboard</p>
+            <p className="text-white/60 text-sm font-light">Погодна панель</p>
           </div>
-          <SearchBar onSearch={handleSearch} isLoading={loading} />
+          <SearchBar onSearch={handleSearch} isLoading={loading} placeholder="Пошук міста..." />
         </div>
 
         {/* Content */}
@@ -76,7 +76,7 @@ const App: React.FC = () => {
           {loading ? (
             <div className="h-96 flex flex-col items-center justify-center text-white/80 space-y-4">
               <Loader2 className="animate-spin" size={48} />
-              <p className="text-lg font-light animate-pulse">Forecasting...</p>
+              <p className="text-lg font-light animate-pulse">Завантаження...</p>
             </div>
           ) : error ? (
             <div className="h-96 flex flex-col items-center justify-center text-white/80 space-y-4 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8">
@@ -86,7 +86,7 @@ const App: React.FC = () => {
                 onClick={() => fetchWeather(city)}
                 className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
               >
-                Try Again
+                Спробувати ще раз
               </button>
             </div>
           ) : weather && forecast ? (

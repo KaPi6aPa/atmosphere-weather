@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ForecastData } from '../types';
 import { format } from 'date-fns';
+import { uk } from 'date-fns/locale';
 import { CloudRain, Sun, Cloud, CloudLightning, CloudSnow, CloudDrizzle } from 'lucide-react';
 
 interface ForecastListProps {
@@ -36,13 +37,13 @@ const ForecastList: React.FC<ForecastListProps> = ({ data }) => {
   return (
     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
       <h3 className="text-white/60 text-sm font-medium uppercase tracking-wider mb-4 flex items-center">
-        <span className="mr-2">📅</span> 5-Day Forecast
+        <span className="mr-2">📅</span> Прогноз на 5 днів
       </h3>
       <div className="space-y-4">
         {dailyForecasts.map((item) => (
           <div key={item.dt} className="flex items-center justify-between text-white group">
-            <span className="w-16 font-medium text-lg">
-              {format(new Date(item.dt * 1000), 'E')}
+            <span className="w-16 font-medium text-lg capitalize">
+              {format(new Date(item.dt * 1000), 'E', { locale: uk })}
             </span>
             <div className="flex flex-col items-center flex-1">
               <div className="opacity-80 group-hover:scale-110 transition-transform duration-300">
