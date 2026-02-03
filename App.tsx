@@ -92,8 +92,8 @@ const App: React.FC = () => {
           ) : weather && forecast ? (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Left Column: Current Weather */}
-              <div className="lg:col-span-5 flex flex-col justify-between space-y-8">
-                <CurrentWeather data={weather} />
+              <div className="lg:col-span-5 flex flex-col justify-between space-y-8 capitalize">
+                <CurrentWeather data={{ ...weather, name: city }} />
                 <div className="hidden lg:block">
                     {/* Spacer or additional decorative elements could go here */}
                 </div>
