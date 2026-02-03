@@ -1,0 +1,5 @@
+{
+  "name": "Atmosphere",
+  "description": "A modern, aesthetic weather dashboard featuring dynamic backgrounds, glassmorphism design, and detailed forecast data using the OpenWeatherMap API.",
+  "requestFramePermissions": []
+}
