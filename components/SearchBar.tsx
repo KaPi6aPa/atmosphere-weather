@@ -21,7 +21,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
     <form onSubmit={handleSubmit} className="relative w-full max-w-xs sm:max-w-md">
       <input
         type="text"
-        placeholder="Search city..."
+        placeholder="Введіть місто..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         disabled={isLoading}

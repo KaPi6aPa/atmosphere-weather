@@ -68,7 +68,7 @@ const App: React.FC = () => {
             <h1 className="text-2xl font-semibold tracking-tight">Atmosphere</h1>
             <p className="text-white/60 text-sm font-light">Погодна панель</p>
           </div>
-          <SearchBar onSearch={handleSearch} isLoading={loading} placeholder="Пошук міста..." />
+          <SearchBar onSearch={handleSearch} isLoading={loading} />
         </div>
 
         {/* Content */}
