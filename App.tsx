@@ -134,7 +134,7 @@ const App: React.FC = () => {
             🌤️ Atmosphere Weather
           </h1>
           <div className="w-full md:w-auto">
-            <SearchBar onSearch={handleSearch} onLocate={handleLocate} isLocating={isLocating} />
+            <SearchBar onSearch={handleSearch} onLocate={handleLocate} />
           </div>
         </header>
 
