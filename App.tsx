@@ -7,6 +7,26 @@ import ForecastList from './components/ForecastList';
 import SearchBar from './components/SearchBar';
 import WeatherGrid from './components/WeatherGrid';
 
+const getBackgroundClass = (condition?: string) => {
+  if (!condition) return 'from-blue-900 to-purple-900';
+
+  switch (condition.toLowerCase()) {
+    case 'clear':
+      return 'from-yellow-400 to-orange-500';
+    case 'clouds':
+      return 'from-purple-900 to-indigo-900';
+    case 'rain':
+    case 'drizzle':
+      return 'from-gray-900 to-blue-900';
+    case 'snow':
+      return 'from-indigo-900 to-blue-800';
+    case 'thunderstorm':
+      return 'from-gray-900 to-black';
+    default:
+      return 'from-blue-900 to-purple-900';
+  }
+};
+
 const App: React.FC = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastData | null>(null);
@@ -107,10 +127,10 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-6">
+    <div className={`min-h-screen bg-gradient-to-br ${getBackgroundClass(weather?.weather?.[0]?.main)} p-4 md:p-6 text-white`}>
       <div className="max-w-6xl mx-auto">
         <header className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl md:text-3xl font-bold text-white">
             🌤️ Atmosphere Weather
           </h1>
           <div className="w-full md:w-auto">
