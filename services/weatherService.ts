@@ -4,7 +4,7 @@ import { WeatherData, ForecastData } from '../types';
 // Cast import.meta to any to resolve TypeScript error regarding 'env' property
 const API_KEY = (import.meta as any).env.VITE_OPENWEATHER_API_KEY || '';
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
-const PHOTON_API_URL = 'https://photon.komoot.io/api/';
+const GEO_API_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 
 export interface City {
   name: string;
@@ -59,33 +59,24 @@ export const searchCities = async (query: string): Promise<City[]> => {
   if (!query) return [];
 
   try {
-    const response = await axios.get(PHOTON_API_URL, {
+    const response = await axios.get(GEO_API_URL, {
       params: {
-        q: query,
-        lang: 'uk',
-        limit: 5
+        name: query,
+        count: 5,
+        language: 'uk',
+        format: 'json'
       }
     });
     
-    const uniqueCities = new Map<string, City>();
+    if (!response.data.results) return [];
 
-    response.data.features.forEach((feature: any) => {
-      const { name, country, state, countrycode } = feature.properties;
-      const [lon, lat] = feature.geometry.coordinates;
-      const key = `${name}-${state || ''}-${country || ''}`;
-
-      if (!uniqueCities.has(key) && name) {
-        uniqueCities.set(key, {
-          name,
-          lat,
-          lon,
-          country: country || countrycode || '',
-          state
-        });
-      }
-    });
-
-    return Array.from(uniqueCities.values());
+    return response.data.results.map((item: any) => ({
+      name: item.name,
+      lat: item.latitude,
+      lon: item.longitude,
+      country: item.country_code,
+      state: item.admin1
+    }));
   } catch (error) {
     console.error("Failed to fetch city suggestions:", error);
     return [];

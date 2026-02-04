@@ -101,8 +101,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
               onClick={() => handleSuggestionClick(city)}
               className="px-4 py-3 hover:bg-white/20 cursor-pointer transition-colors flex items-center justify-between"
             >
-              {highlightMatch(city.name, query)}
-              <span className="text-xs opacity-60 bg-white/10 px-2 py-1 rounded">
+              <div className="flex flex-col items-start">
+                {highlightMatch(city.name, query)}
+                {city.state && (
+                  <span className="text-xs text-white/50">{city.state}</span>
+                )}
+              </div>
+              <span className="text-xs opacity-60 bg-white/10 px-2 py-1 rounded ml-2 shrink-0">
                 {city.country}
               </span>
             </li>
