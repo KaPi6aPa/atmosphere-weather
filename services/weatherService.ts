@@ -59,14 +59,22 @@ export const searchCities = async (query: string): Promise<City[]> => {
   if (!query || !API_KEY) return [];
 
   try {
-    const response = await axios.get<City[]>(GEO_BASE_URL, {
+    // Use any[] to access local_names which is not in the City interface
+    const response = await axios.get<any[]>(GEO_BASE_URL, {
       params: {
         q: query,
         limit: 5,
         appid: API_KEY
       }
     });
-    return response.data;
+    
+    return response.data.map((item) => ({
+      name: item.local_names?.['uk'] || item.local_names?.['ru'] || item.name,
+      lat: item.lat,
+      lon: item.lon,
+      country: item.country,
+      state: item.state
+    }));
   } catch (error) {
     console.error("Failed to fetch city suggestions:", error);
     return [];

@@ -30,7 +30,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
   // Debounce пошуку
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
-      if (query.length > 2) {
+      if (query.length >= 2) {
         const cities = await searchCities(query);
         setSuggestions(cities);
         setShowSuggestions(cities.length > 0);
@@ -62,6 +62,21 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
     }
   };
 
+  const highlightMatch = (text: string, highlight: string) => {
+    if (!highlight.trim()) return <span>{text}</span>;
+    
+    const regex = new RegExp(`(${highlight})`, 'gi');
+    const parts = text.split(regex);
+    
+    return (
+      <span>
+        {parts.map((part, i) => 
+          regex.test(part) ? <span key={i} className="font-bold text-white">{part}</span> : <span key={i} className="text-white/80">{part}</span>
+        )}
+      </span>
+    );
+  };
+
   return (
     <div ref={wrapperRef} className="relative w-full max-w-md">
       <form onSubmit={handleFormSubmit} className="relative flex items-center">
@@ -86,7 +101,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
               onClick={() => handleSuggestionClick(city)}
               className="px-4 py-3 hover:bg-white/20 cursor-pointer transition-colors flex items-center justify-between"
             >
-              <span>{city.name}</span>
+              {highlightMatch(city.name, query)}
               <span className="text-xs opacity-60 bg-white/10 px-2 py-1 rounded">
                 {city.country}
               </span>
