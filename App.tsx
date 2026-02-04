@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Wind, Droplets, Eye, Gauge, Cloud, Thermometer } from 'lucide-react';
 import { getWeatherData } from './services/weatherService';
 import { WeatherData, ForecastData } from './types';
 import CurrentWeather from './components/CurrentWeather';
 import ForecastList from './components/ForecastList';
 import SearchBar from './components/SearchBar';
-import WeatherGrid from './components/WeatherGrid';
 
 const getBackgroundClass = (condition?: string) => {
-  if (!condition) return 'from-blue-900 to-purple-900';
+  if (!condition) return 'from-indigo-900 via-purple-900 to-slate-900';
 
   switch (condition.toLowerCase()) {
     case 'clear':
-      return 'from-yellow-400 to-orange-500';
+      return 'from-blue-400 to-emerald-400';
     case 'clouds':
-      return 'from-purple-900 to-indigo-900';
+      return 'from-indigo-900 via-purple-900 to-slate-900';
     case 'rain':
     case 'drizzle':
       return 'from-gray-900 to-blue-900';
     case 'snow':
-      return 'from-indigo-900 to-blue-800';
+      return 'from-blue-800 to-indigo-900';
     case 'thunderstorm':
       return 'from-gray-900 to-black';
     default:
-      return 'from-blue-900 to-purple-900';
+      return 'from-indigo-900 via-purple-900 to-slate-900';
   }
 };
 
@@ -139,12 +138,50 @@ const App: React.FC = () => {
         </header>
 
         {weather && forecast && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column: Current Weather */}
+            <div>
               <CurrentWeather data={weather} />
-              <WeatherGrid data={weather} />
             </div>
-            <div className="lg:col-span-1">
+
+            {/* Right Column: Grid & Forecast */}
+            <div className="flex flex-col gap-6">
+              {/* 2x3 Detail Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
+                  <Thermometer className="w-6 h-6 mb-2 text-yellow-300" />
+                  <span className="text-sm text-gray-200">Feels Like</span>
+                  <span className="text-lg font-bold">{Math.round(weather.main.feels_like)}°</span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
+                  <Wind className="w-6 h-6 mb-2 text-blue-300" />
+                  <span className="text-sm text-gray-200">Wind</span>
+                  <span className="text-lg font-bold">{weather.wind.speed} m/s</span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
+                  <Droplets className="w-6 h-6 mb-2 text-blue-400" />
+                  <span className="text-sm text-gray-200">Humidity</span>
+                  <span className="text-lg font-bold">{weather.main.humidity}%</span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
+                  <Gauge className="w-6 h-6 mb-2 text-red-300" />
+                  <span className="text-sm text-gray-200">Pressure</span>
+                  <span className="text-lg font-bold">{weather.main.pressure} hPa</span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
+                  <Eye className="w-6 h-6 mb-2 text-teal-300" />
+                  <span className="text-sm text-gray-200">Visibility</span>
+                  <span className="text-lg font-bold">
+                    {weather.visibility ? (weather.visibility / 1000).toFixed(1) : '10.0'} km
+                  </span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
+                  <Cloud className="w-6 h-6 mb-2 text-gray-300" />
+                  <span className="text-sm text-gray-200">Cloudiness</span>
+                  <span className="text-lg font-bold">{weather.clouds.all}%</span>
+                </div>
+              </div>
+
               <ForecastList data={forecast} />
             </div>
           </div>
