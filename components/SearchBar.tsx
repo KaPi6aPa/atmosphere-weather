@@ -1,49 +1,138 @@
-import React, { useState } from 'react';
-import { Search, MapPin, Loader2 } from 'lucide-react';
+// src/components/SearchBar.jsx
+import React, { useState, useEffect, useRef } from 'react';
+import { searchCities } from '../services/weather';
 
-const SearchBar = ({ onSearch, onLocate, isLocating }) => {
+// Иконка поиска (SVG)
+const SearchIcon = () => (
+  <svg className="w-5 h-5 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  </svg>
+);
+
+// Иконка геолокации (SVG)
+const LocationIcon = () => (
+  <svg className="w-5 h-5 text-white hover:text-blue-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const SearchBar = ({ onSearch, onLocate }) => {
   const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  // Ref для отслеживания кликов вне компонента
+  const wrapperRef = useRef(null);
+
+  // Debounce эффект: ждем 400мс после окончания ввода перед запросом
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (query.length > 2) {
+        setLoading(true);
+        const results = await searchCities(query);
+        setSuggestions(results);
+        setShowSuggestions(true);
+        setLoading(false);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [query]);
+
+  // Закрытие списка при клике вне компонента
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleInputChange = (e) => {
+    setQuery(e.target.value);
+  };
+
+  const handleSuggestionClick = (city) => {
+    // 1. Обновляем текст в инпуте
+    setQuery(city.name);
+    // 2. Скрываем подсказки
+    setShowSuggestions(false);
+    // 3. Сразу запускаем поиск (передаем название города)
+    if (onSearch) onSearch(city.name); 
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (query.trim()) {
+    if (query.trim() && onSearch) {
       onSearch(query);
-      setQuery('');
+      setShowSuggestions(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto mb-8">
-      <div className="relative flex items-center">
-        {/* Search Icon (Left) */}
-        <Search className="absolute left-4 text-white/70 w-5 h-5" />
-        
-        {/* Input Field */}
+    <div ref={wrapperRef} className="relative w-full max-w-md mx-auto z-50">
+      <form onSubmit={handleSubmit} className="relative flex items-center">
+        {/* Иконка поиска слева */}
+        <div className="absolute left-3 pointer-events-none">
+          <SearchIcon />
+        </div>
+
+        {/* Поле ввода */}
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search city..."
-          className="w-full py-3 pl-12 pr-12 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 shadow-lg transition-all"
+          onChange={handleInputChange}
+          placeholder="Введіть місто..."
+          className="w-full py-3 pl-10 pr-12 text-white bg-white/20 backdrop-blur-md border border-white/30 rounded-full shadow-lg placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
         />
 
-        {/* Locate Me Button (Right) */}
+        {/* Кнопка геолокации справа */}
         <button
           type="button"
           onClick={onLocate}
-          disabled={isLocating}
-          className="absolute right-2 p-2 rounded-xl hover:bg-white/10 text-white/80 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Use my current location"
-          aria-label="Use my current location"
+          title="Визначити моє місцезнаходження"
+          className="absolute right-3 p-1 rounded-full hover:bg-white/10 transition-colors"
         >
-          {isLocating ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <MapPin className="w-5 h-5" />
-          )}
+          <LocationIcon />
         </button>
-      </div>
-    </form>
+      </form>
+
+      {/* Выпадающий список (Glassmorphism) */}
+      {showSuggestions && suggestions.length > 0 && (
+        <ul className="absolute w-full mt-2 overflow-hidden bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl animate-fade-in">
+          {suggestions.map((city, index) => (
+            <li
+              key={`${city.lat}-${city.lon}-${index}`}
+              onClick={() => handleSuggestionClick(city)}
+              className="px-4 py-3 cursor-pointer hover:bg-white/20 transition-colors border-b border-white/10 last:border-none text-left"
+            >
+              <div className="flex flex-col">
+                <span className="text-white font-medium text-base">
+                  {city.name}
+                </span>
+                <span className="text-gray-300 text-xs">
+                  {city.state ? `${city.state}, ` : ''}{city.country}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      
+      {/* Индикатор загрузки (опционально) */}
+      {loading && query.length > 2 && !suggestions.length && (
+        <div className="absolute w-full mt-2 p-3 text-center text-white/70 bg-white/10 backdrop-blur-xl rounded-xl border border-white/10">
+          Пошук...
+        </div>
+      )}
+    </div>
   );
 };
 

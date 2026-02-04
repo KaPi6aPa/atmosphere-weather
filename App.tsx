@@ -7,22 +7,23 @@ import ForecastList from './components/ForecastList';
 import SearchBar from './components/SearchBar';
 
 const getBackgroundClass = (condition?: string) => {
-  if (!condition) return 'from-indigo-900 via-purple-900 to-slate-900';
+  const deepPurple = 'from-indigo-900 via-purple-900 to-slate-900';
+  if (!condition) return deepPurple;
 
   switch (condition.toLowerCase()) {
     case 'clear':
       return 'from-blue-400 to-emerald-400';
     case 'clouds':
-      return 'from-indigo-900 via-purple-900 to-slate-900';
+      return deepPurple;
     case 'rain':
     case 'drizzle':
-      return 'from-gray-900 to-blue-900';
+      return deepPurple;
     case 'snow':
       return 'from-blue-800 to-indigo-900';
     case 'thunderstorm':
       return 'from-gray-900 to-black';
     default:
-      return 'from-indigo-900 via-purple-900 to-slate-900';
+      return deepPurple;
   }
 };
 
@@ -126,7 +127,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${getBackgroundClass(weather?.weather?.[0]?.main)} p-4 md:p-6 text-white`}>
+    <div className={`min-h-screen bg-gradient-to-br ${getBackgroundClass(weather?.weather?.[0]?.main)} p-4 md:p-6 text-white/90`}>
       <div className="max-w-6xl mx-auto">
         <header className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <h1 className="text-2xl md:text-3xl font-bold text-white">
@@ -150,38 +151,45 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
                   <Thermometer className="w-6 h-6 mb-2 text-yellow-300" />
-                  <span className="text-sm text-gray-200">Feels Like</span>
+                  <span className="text-sm text-white/80">Відчувається як</span>
+                  <span className="text-xs text-white/50 mb-1">Реальне відчуття</span>
                   <span className="text-lg font-bold">{Math.round(weather.main.feels_like)}°</span>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
                   <Wind className="w-6 h-6 mb-2 text-blue-300" />
-                  <span className="text-sm text-gray-200">Wind</span>
+                  <span className="text-sm text-white/80">Вітер</span>
+                  <span className="text-xs text-white/50 mb-1">Напрямок: {weather.wind.deg}°</span>
                   <span className="text-lg font-bold">{weather.wind.speed} m/s</span>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
                   <Droplets className="w-6 h-6 mb-2 text-blue-400" />
-                  <span className="text-sm text-gray-200">Humidity</span>
+                  <span className="text-sm text-white/80">Вологість</span>
+                  <span className="text-xs text-white/50 mb-1">Точка роси</span>
                   <span className="text-lg font-bold">{weather.main.humidity}%</span>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
                   <Gauge className="w-6 h-6 mb-2 text-red-300" />
-                  <span className="text-sm text-gray-200">Pressure</span>
+                  <span className="text-sm text-white/80">Тиск</span>
+                  <span className="text-xs text-white/50 mb-1">Атмосферний</span>
                   <span className="text-lg font-bold">{weather.main.pressure} hPa</span>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
                   <Eye className="w-6 h-6 mb-2 text-teal-300" />
-                  <span className="text-sm text-gray-200">Visibility</span>
+                  <span className="text-sm text-white/80">Видимість</span>
+                  <span className="text-xs text-white/50 mb-1">Ясна видимість</span>
                   <span className="text-lg font-bold">
                     {weather.visibility ? (weather.visibility / 1000).toFixed(1) : '10.0'} km
                   </span>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center text-center">
                   <Cloud className="w-6 h-6 mb-2 text-gray-300" />
-                  <span className="text-sm text-gray-200">Cloudiness</span>
+                  <span className="text-sm text-white/80">Хмарність</span>
+                  <span className="text-xs text-white/50 mb-1">Покриття неба</span>
                   <span className="text-lg font-bold">{weather.clouds.all}%</span>
                 </div>
               </div>
 
+              <h3 className="text-xl font-semibold text-white/90 mt-2">Прогноз на 5 днів</h3>
               <ForecastList data={forecast} />
             </div>
           </div>
