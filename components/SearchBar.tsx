@@ -1,120 +1,49 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { searchCities, City } from '../services/weatherService';
-import { Search } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, MapPin, Loader2 } from 'lucide-react';
 
-interface SearchBarProps {
-  onSearch: (city: string) => void;
-  isLoading?: boolean;
-}
-
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => {
+const SearchBar = ({ onSearch, onLocate, isLocating }) => {
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<City[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Обробка кліку поза компонентом
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Debounce пошуку
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (query.length >= 2) {
-        const cities = await searchCities(query);
-        setSuggestions(cities);
-        setShowSuggestions(cities.length > 0);
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [query]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-  };
-
-  const handleSuggestionClick = (city: City) => {
-    const locationString = city.name; // Можна додати країну, якщо потрібно: `${city.name}, ${city.country}`
-    setQuery(locationString);
-    setShowSuggestions(false);
-    onSearch(city.name);
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
       onSearch(query);
-      setShowSuggestions(false);
+      setQuery('');
     }
   };
 
-  const highlightMatch = (text: string, highlight: string) => {
-    if (!highlight.trim()) return <span>{text}</span>;
-    
-    const regex = new RegExp(`(${highlight})`, 'gi');
-    const parts = text.split(regex);
-    
-    return (
-      <span>
-        {parts.map((part, i) => 
-          regex.test(part) ? <span key={i} className="font-bold text-white">{part}</span> : <span key={i} className="text-white/80">{part}</span>
-        )}
-      </span>
-    );
-  };
-
   return (
-    <div ref={wrapperRef} className="relative w-full max-w-md">
-      <form onSubmit={handleFormSubmit} className="relative flex items-center">
+    <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto mb-8">
+      <div className="relative flex items-center">
+        {/* Search Icon (Left) */}
+        <Search className="absolute left-4 text-white/70 w-5 h-5" />
+        
+        {/* Input Field */}
         <input
           type="text"
-          placeholder="Введіть назву міста..."
           value={query}
-          onChange={handleInputChange}
-          className="w-full px-4 py-3 pl-12 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:bg-white/20 focus:border-white/30 backdrop-blur-md transition-all"
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search city..."
+          className="w-full py-3 pl-12 pr-12 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 shadow-lg transition-all"
         />
-        <Search className="absolute left-4 text-white/50" size={20} />
-        {isLoading && (
-          <div className="absolute right-4 w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-        )}
-      </form>
 
-      {showSuggestions && (
-        <ul className="absolute top-full left-0 right-0 mt-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto text-white">
-          {suggestions.map((city, index) => (
-            <li
-              key={`${city.lat}-${city.lon}-${index}`}
-              onClick={() => handleSuggestionClick(city)}
-              className="px-4 py-3 hover:bg-white/20 cursor-pointer transition-colors flex items-center justify-between"
-            >
-              <div className="flex flex-col items-start">
-                {highlightMatch(city.name, query)}
-                {city.state && (
-                  <span className="text-xs text-white/50">{city.state}</span>
-                )}
-              </div>
-              <span className="text-xs opacity-60 bg-white/10 px-2 py-1 rounded ml-2 shrink-0">
-                {city.country}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+        {/* Locate Me Button (Right) */}
+        <button
+          type="button"
+          onClick={onLocate}
+          disabled={isLocating}
+          className="absolute right-2 p-2 rounded-xl hover:bg-white/10 text-white/80 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Use my current location"
+          aria-label="Use my current location"
+        >
+          {isLocating ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <MapPin className="w-5 h-5" />
+          )}
+        </button>
+      </div>
+    </form>
   );
 };
 
