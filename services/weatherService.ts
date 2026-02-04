@@ -4,6 +4,15 @@ import { WeatherData, ForecastData } from '../types';
 // Cast import.meta to any to resolve TypeScript error regarding 'env' property
 const API_KEY = (import.meta as any).env.VITE_OPENWEATHER_API_KEY || '';
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
+const GEO_BASE_URL = 'https://api.openweathermap.org/geo/1.0/direct';
+
+export interface City {
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+  state?: string;
+}
 
 export const getWeatherData = async (city: string): Promise<{ weather: WeatherData; forecast: ForecastData }> => {
   if (!API_KEY) {
@@ -43,5 +52,23 @@ export const getWeatherData = async (city: string): Promise<{ weather: WeatherDa
       throw new Error(message || 'Не вдалося отримати дані про погоду');
     }
     throw error;
+  }
+};
+
+export const searchCities = async (query: string): Promise<City[]> => {
+  if (!query || !API_KEY) return [];
+
+  try {
+    const response = await axios.get<City[]>(GEO_BASE_URL, {
+      params: {
+        q: query,
+        limit: 5,
+        appid: API_KEY
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch city suggestions:", error);
+    return [];
   }
 };
