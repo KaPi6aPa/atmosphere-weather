@@ -1,108 +1,137 @@
 import React, { useState, useEffect } from 'react';
-import SearchBar from './components/SearchBar';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { getWeatherData } from './services/weatherService';
-import { getWeatherByCoords } from './services/weather';
-// ... other imports (WeatherCard, etc.)
+import { WeatherData, ForecastData } from './types';
+import CurrentWeather from './components/CurrentWeather';
+import ForecastList from './components/ForecastList';
+import SearchBar from './components/SearchBar';
+import WeatherGrid from './components/WeatherGrid';
 
-function App() {
-  const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(false); // General loading state
-  const [isLocating, setIsLocating] = useState(false); // Specific loading state for geolocation
+const App: React.FC = () => {
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [forecast, setForecast] = useState<ForecastData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isLocating, setIsLocating] = useState<boolean>(false);
 
-  // Helper to fetch default city
-  const fetchDefaultCity = async () => {
-    setLoading(true);
+  const fetchWeather = async (city: string, lat?: number, lon?: number) => {
     try {
-      const data = await getWeatherData('Kyiv');
-      setWeather(data);
-    } catch (error) {
-      console.error("Failed to load default city:", error);
+      setLoading(true);
+      setError(null);
+      
+      const data = await getWeatherData(city, lat, lon);
+      
+      setWeather(data.weather);
+      setForecast(data.forecast);
+    } catch (err) {
+      console.error('Error fetching weather:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load weather data');
     } finally {
       setLoading(false);
     }
   };
 
-  // Handler for Geolocation
-  const handleLocateMe = () => {
+  useEffect(() => {
+    const initializeWeather = () => {
+      if (!navigator.geolocation) {
+        fetchWeather('Kyiv');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          fetchWeather('', position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.warn('Geolocation access denied or failed:', error);
+          fetchWeather('Kyiv');
+        }
+      );
+    };
+
+    initializeWeather();
+  }, []);
+
+  const handleSearch = (query: string) => {
+    if (!query.trim()) return;
+    fetchWeather(query);
+  };
+
+  const handleLocate = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
+      setError('Geolocation is not supported');
       return;
     }
 
     setIsLocating(true);
-
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const data = await getWeatherByCoords(latitude, longitude);
-          setWeather(data);
-        } catch (error) {
-          console.error("Error fetching weather by location:", error);
-          // Optional: Show an error toast here
-        } finally {
-          setIsLocating(false);
-        }
+      (position) => {
+        fetchWeather('', position.coords.latitude, position.coords.longitude);
+        setIsLocating(false);
       },
       (error) => {
-        console.warn("Geolocation denied or error:", error);
+        console.warn('Geolocation access denied:', error);
+        setError('Unable to access your location');
         setIsLocating(false);
-        // If we don't have weather data yet (startup), fallback to default
-        if (!weather) fetchDefaultCity();
       }
     );
   };
 
-  // Initial Load Logic
-  useEffect(() => {
-    if (navigator.geolocation) {
-      // Attempt to get location on startup
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            const data = await getWeatherByCoords(latitude, longitude);
-            setWeather(data);
-          } catch (error) {
-            fetchDefaultCity();
-          }
-        },
-        (error) => {
-          // Fallback to Kyiv if denied or error
-          fetchDefaultCity();
-        }
-      );
-    } else {
-      fetchDefaultCity();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+          <p className="text-gray-600 font-medium">Loading weather data...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const handleSearch = async (city) => {
-    setLoading(true);
-    try {
-      const data = await getWeatherData(city);
-      setWeather(data);
-    } catch (error) {
-      console.error("Search failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button 
+            onClick={() => fetchWeather('Kyiv')}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+          >
+            Reload Default City
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="app-container">
-      {/* Pass the new props to SearchBar */}
-      <SearchBar 
-        onSearch={handleSearch} 
-        onLocate={handleLocateMe} 
-        isLocating={isLocating} 
-      />
-      
-      {/* Render your weather content here */}
-      {/* ... */}
+    <div className="min-h-screen bg-gray-100 p-4 md:p-6">
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            🌤️ Atmosphere Weather
+          </h1>
+          <div className="w-full md:w-auto">
+            <SearchBar onSearch={handleSearch} onLocate={handleLocate} isLocating={isLocating} />
+          </div>
+        </header>
+
+        {weather && forecast && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <CurrentWeather data={weather} />
+              <WeatherGrid data={weather} />
+            </div>
+            <div className="lg:col-span-1">
+              <ForecastList data={forecast} />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
